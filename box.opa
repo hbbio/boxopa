@@ -41,12 +41,13 @@ index_page() =
 (
   id = Random.string(8)
   Resource.styled_page("Creating new box", ["/css"],
+// onclick="this.select();"
     <body>
       <div id="content">
         <h1>Welcome</h1>
         <a href="/box/{id}"><img src="http://i.imgur.com/WBbSg.png"/></a>
         <h3>Your box has been created.  Click <a href="/box/{id}">the box</a> to open it!</h3>
-        <input type="text" id="perm" value="{box_url(id)}" onclick="this.select();" />
+        <input type="text" id="perm" value="{box_url(id)}" />
       </div>
     </body>
   )
@@ -148,13 +149,14 @@ show_box(path) =
   callback = e -> files_update(path, e)
   finfo = List.map(get_file_info, b.files)
   Resource.styled_page("Showing box {path}", ["/css"],
+//onclick="this.select();" />
     <body onready={_ -> Network.add_callback(callback, room)}>
       <div id="content">
         <h1>This is your box.  Upload anything you want!</h1>
         <h3>Click the file icon to download the file.</h3>
         <h3>Anyone with this box's URL will be able to download these files!</h3>
         <h3>Copy the URL and share with friends!</h3>
-        <input type="text" id="perm" value="{box_url(path)}" onclick="this.select();" />
+        <input type="text" id="perm" value="{box_url(path)}" />
         <p>All viewers of this page will see the files the instant they are uploaded.</p>
         <div class="row" id="files">
           {List.map(show_file(path,_), finfo)}
