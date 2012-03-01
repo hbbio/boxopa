@@ -1,0 +1,30 @@
+/**
+ * @author Ida Swarczewskaja (CSS & design)
+ */
+
+@darkBlue:	#1F3546;
+@darkerBlue:	#121F29;
+
+.rounded-corners (@radius: 5px) {
+  border-radius: @radius;
+  -webkit-border-radius: @radius;
+  -moz-border-radius: @radius;
+}
+
+html {
+  background: #101314 fixed url('/resources/img/boxopa-bg-tile.png') repeat top left;
+}
+body {
+  background:transparent fixed url('/resources/img/boxopa-bg-gradient.png') repeat-x top left;
+  color: #87A9C5;
+}
+a.cross {
+  background-color:@darkBlue;
+  border:1px solid white;
+  color:white;
+  font-size:bold;
+  .rounded-corners(15px);
+}
+.well {
+  background-color:lighten(@darkerBlue, 60%);
+}

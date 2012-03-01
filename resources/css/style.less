@@ -1,0 +1,76 @@
+/**
+ * @author Ida Swarczewskaja (CSS & design)
+ */
+/* Colors */
+@darkBlue:	#1F3546;
+@darkerBlue:	#121F29;
+@lightBlue:     #87A9C5;
+@grayBlue:	#668396;
+@green:		#629E36;
+
+.color_bg(@color: @white, @alpha: 1) {
+  background: hsla(hue(@color), saturation(@color), lightness(@color), @alpha);}
+
+/* Radius */
+.rounded-corners (@radius: 5px) {
+  border-radius: @radius;
+  -webkit-border-radius: @radius;
+  -moz-border-radius: @radius;
+}
+/* Main */
+html, .navbar-inner {
+  background: #101314 fixed url('/resources/img/boxopa-bg-gradient.png') repeat-x top left;
+}
+.navbar-inner {
+  border-bottom:1px solid @darkerBlue;
+  /*background-image: -webkit-linear-gradient(top, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.1));*/
+  -webkit-box-shadow: 0 1px 3px rgba(255, 255, 255, 0.1), inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+body {
+  background:transparent;
+}
+body, h1,h2,h3,h4,h5,h6 {
+color: @grayBlue;
+font-weight: normal;
+text-shadow: 0 -1px 1px black;
+}
+
+.navbar input {background:@darkBlue;color:@green;border-color:#121F29;}
+.centered {text-align:center;}
+
+.thumbnail {text-align:center;border:none;}
+
+/* File */
+.thumbnails > li {position:relative;}
+a.cross {
+  background-color:@darkBlue;
+  border:2px solid white;
+  color:white;
+  font-size:26px;
+  line-height: 14px;
+  font-weight:bold;
+  height: 20px;
+  width: 20px;
+  display: block;
+  text-align: center;
+  .rounded-corners(15px);
+position: absolute;
+top: 0;
+right: 35px;
+}
+.well {
+  .color_bg(@darkerBlue,.5);
+  padding:5px;
+}
+
+/* homepage */
+a.box { 
+  background:transparent url('/resources/img/boxopa-box.png') no-repeat 50% 50%;
+  height:256px;
+  width:256px;
+  display:block;
+}
+a.box .well {
+  color:white;
+  font-size:16px;
+}
