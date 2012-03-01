@@ -1,10 +1,8 @@
 
-import stdlib.themes.bootstrap
+import stdlib.themes.bootstrap.core
 import stdlib.upload
 import stdlib.io.file
 import stdlib.web.client
-
-resources_css = @static_resource_directory("resources")
 
 type FileInfo = {
   name: string;
@@ -40,14 +38,24 @@ box_url(id) = "{hostname()}/box/{id}"
 index_page() = 
 (
   id = Random.string(8)
-  Resource.styled_page("Creating new box", ["/css"],
+  Resource.page("Creating new box", 
 // onclick="this.select();"
     <body>
-      <div id="content">
-        <h1>Welcome</h1>
-        <a href="/box/{id}"><img src="http://i.imgur.com/WBbSg.png"/></a>
-        <h3>Your box has been created.  Click <a href="/box/{id}">the box</a> to open it!</h3>
-        <input type="text" id="perm" value="{box_url(id)}" />
+      <div class="navbar">
+        <div class="navbar-inner">
+          <div class="container">
+            <a class="brand" href="#"><img src="resources/img/boxopa-logo.png" alt="boxopa"/></a>
+            <div class="well pull-right">Share URL with friends: <input type="text" id="perm" value="{box_url(id)}" /></div>
+          </div>
+        </div>
+      </div>
+      <div id="content" class="container">
+      <div class="span4 centered">
+        <h1>Welcome. Your box has been created.</h1>
+        <a class="box" href="/box/{id}">
+           <div class="well">Click to open</div>
+        </a>       
+      </div>
       </div>
     </body>
   )
@@ -72,17 +80,24 @@ delete_file(bid, id) =
 
 @server
 get_image(m) =
-  if String.has_prefix("image", m) then "http://i.imgur.com/wCvgr.png"
-  else "http://i.imgur.com/qDkLr.png"
+  if String.has_prefix("image", m) then "/resources/img/boxopa-file-img.png"
+  else "/resources/img/boxopa-file-misc.png"
 
 @server
 show_file(box, f) =
 (
-  <div class="span3" id="{f.id}" style="padding-top: 50px;">
-    <a style="font-size: 1.5em;" href="/assets/{box}/{f.id}/{f.name}">{f.name}</><br/>
-    <a href="/assets/{box}/{f.id}/{f.name}"><img class="thumbnail" style="width: 90px;" src="{get_image(f.mimetype)}"/></a><br/>
-    <a href="#" class="btn danger" onclick={_ -> delete_file(box, f.id)}>Delete file</a>
-  </div>
+  <li class="span2" id="{f.id}">
+    <div class="thumbnail">
+       <a href="/assets/{box}/{f.id}/{f.name}">
+          <img src="{get_image(f.mimetype)}"/>
+          <div class="download" style="display:none;"></div>
+       </a>   
+       <div class="caption">
+          <h5><a href="/assets/{box}/{f.id}/{f.name}">{f.name}</></h5>
+       </div>
+    </div>
+    <a href="#" class="cross" onclick={_ -> delete_file(box, f.id)} title="Remove">×</a>
+  </li>
 )
 
 @server
@@ -151,21 +166,28 @@ show_box(path) =
   Resource.styled_page("Showing box {path}", ["/css"],
 //onclick="this.select();" />
     <body onready={_ -> Network.add_callback(callback, room)}>
-      <div id="content">
+      <div class="navbar">
+        <div class="navbar-inner">
+          <div class="container">
+            <a class="brand" href="#"><img src="/resources/img/boxopa-logo.png" alt="boxopa"/></a>
+            <div class="well pull-right">Share URL with friends: <input type="text" id="perm" value="{box_url(path)}" /></div>
+          </div>
+        </div>
+      </div>
+      <div id="content" class="container">
         <h1>This is your box.  Upload anything you want!</h1>
         <h3>Click the file icon to download the file.</h3>
         <h3>Anyone with this box's URL will be able to download these files!</h3>
         <h3>Copy the URL and share with friends!</h3>
-        <input type="text" id="perm" value="{box_url(path)}" />
         <p>All viewers of this page will see the files the instant they are uploaded.</p>
-        <div class="row" id="files">
+        <ul class="thumbnails" id="files">
           {List.map(show_file(path,_), finfo)}
-        </div>
+        </ul>
         <div id="up">
         </div>
         <div id="error">
         </div>
-        <a class="btn success" href="#" onclick={_ -> add_file(path)}>Add file</a>
+        <a class="btn btn-success" href="#" onclick={_ -> add_file(path)}>Add file</a>
       </div>
     </body>
   )
@@ -194,10 +216,12 @@ start(uri) = (
     | {path = {nil} ...} -> index_page()
     | {path = {hd="box" ~tl} ...} -> show_box(String.concat("", tl))
     | {path = {hd="assets" ~tl} ...} -> deliver_assets(tl)
-    | {path = {hd="css" ...} ...} -> 
-          Resource.source(@static_source_content("resources/main.css"),"text/css")
     | {path = _ ...} -> do_404()
 )
 
-server = Server.simple_dispatch(start)
-
+//server = Server.simple_dispatch(start)
+_ = Server.start(Server.http,
+        [{resources = @static_resource_directory("resources")},
+         {register = ["/resources/css/bootstrap.min.css", "/resources/css/style.css"]},
+         {dispatch = start}] <: Server.handler)
+    
