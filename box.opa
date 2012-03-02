@@ -175,11 +175,10 @@ show_box(path) =
         </div>
       </div>
       <div id="content" class="container">
-        <h1>This is your box.  Upload anything you want!</h1>
+        <h1>This is your box.  Upload anything you want & share URL with friends.</h1>
         <h3>Click the file icon to download the file.</h3>
-        <h3>Anyone with this box's URL will be able to download these files!</h3>
-        <h3>Copy the URL and share with friends!</h3>
-        <p>All viewers of this page will see the files the instant they are uploaded.</p>
+        <h3>Share URL with friends so they can download your files.</h3>
+        <h3>All viewers of this page will see the files the instant they are uploaded.</h3>
         <ul class="thumbnails" id="files">
           {List.map(show_file(path,_), finfo)}
         </ul>
