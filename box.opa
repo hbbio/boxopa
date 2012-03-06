@@ -44,18 +44,29 @@ index_page() =
       <div class="navbar">
         <div class="navbar-inner">
           <div class="container">
-            <a class="brand" href="#"><img src="resources/img/boxopa-logo.png" alt="boxopa"/></a>
-            <div class="well pull-right">Share URL with friends: <input type="text" id="perm" value="{box_url(id)}" /></div>
+            <div class="row">
+              <div class="span4 offset4">
+                <a class="brand" href="#"><img src="/resources/img/boxopa-logo.png" alt="boxopa"/></a>
+                <div class="centered form-inline">
+                  <label>Your box URL </label>
+                  <input type="text" id="perm" value="{box_url(id)}" />
+                </div>
+              </div>    
+            </div>
           </div>
         </div>
       </div>
       <div id="content" class="container">
-      <div class="span4 centered">
-        <h1>Welcome. Your box has been created.</h1>
-        <a class="box" href="/box/{id}">
-           <div class="well">Click to open</div>
-        </a>       
-      </div>
+        <div class="row">
+          <div class="span4 offset4 centered">
+            <a class="box" href="/box/{id}">
+              <div class="well">
+                <h3>Click to open</h3>
+              </div>
+            </a>
+            <h3>Welcome. Your box has been created.</h3>       
+          </div>
+        </div>
       </div>
     </body>
   )
@@ -88,15 +99,17 @@ show_file(box, f) =
 (
   <li class="span2" id="{f.id}">
     <div class="thumbnail">
+      <div class="thumbnail-inner">
        <a href="/assets/{box}/{f.id}/{f.name}">
           <img src="{get_image(f.mimetype)}"/>
-          <div class="download" style="display:none;"></div>
-       </a>   
-       <div class="caption">
-          <h5><a href="/assets/{box}/{f.id}/{f.name}">{f.name}</></h5>
-       </div>
+          <div class="download"></div>
+       </a>
+       <a href="#" class="circle" onclick={_ -> delete_file(box, f.id)} title="Remove">×</a>
+      </div>
+      <div class="caption">
+        <h5><a href="/assets/{box}/{f.id}/{f.name}">{f.name}</></h5>
+      </div>
     </div>
-    <a href="#" class="cross" onclick={_ -> delete_file(box, f.id)} title="Remove">×</a>
   </li>
 )
 
@@ -119,12 +132,10 @@ process_upload(bid,upload_data) =
                        mimetype = mtype;
                        content = content } // Storing file in database; work on C-extension
           do create_file(bid, new_file)
-          do Dom.remove(#upload)
           do Network.broadcast(info, room)
           void
     | _ -> 
-          do Dom.remove(#upload)
-          do Dom.transform([#error +<- <p>Error uploading file!</p>])
+          do Dom.transform([#error +<- <h3>File uploading failed, please try again.</h3>])
           void
 )
 
@@ -135,16 +146,16 @@ show_upload_form(bid) =
         form_id = "upload";
         form_body =
             <input type="file" name="upload" />
-            <input type="submit" class="btn" value="Upload!" />;
+            <input type="submit" class="btn btn-success" value="Upload" />;
         process = a -> process_upload(bid, a);
      })
 )
 
 
-add_file(bid) =
-(
-  Dom.transform([#up <- show_upload_form(bid)])
-)
+//add_file(bid) =
+//(
+//  Dom.transform([#up <- show_upload_form(bid)])
+//)
 
 network(id) : Network.network(FileInfo) =
   Network.cloud(id)
@@ -169,24 +180,36 @@ show_box(path) =
       <div class="navbar">
         <div class="navbar-inner">
           <div class="container">
-            <a class="brand" href="#"><img src="/resources/img/boxopa-logo.png" alt="boxopa"/></a>
-            <div class="well pull-right">Share URL with friends: <input type="text" id="perm" value="{box_url(path)}" /></div>
+            <div class="row">
+              <div class="span4 offset4">
+                <a class="brand" href="#"><img src="/resources/img/boxopa-logo.png" alt="boxopa"/></a>
+                <div class="centered form-inline">
+                  <label>Your box URL </label>
+                  <input type="text" id="perm" value="{box_url(path)}" />
+              </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
       <div id="content" class="container">
-        <h1>This is your box.  Upload anything you want & share URL with friends.</h1>
-        <h3>Click the file icon to download the file.</h3>
-        <h3>Share URL with friends so they can download your files.</h3>
-        <h3>All viewers of this page will see the files the instant they are uploaded.</h3>
+        <div class="row">
+          <div class="span4 offset4">
+            <div id="up" class="well">
+              {show_upload_form(path)}
+            </div>
+            <div id="error">
+            </div>
+          </div>
+          <div class="span4">
+              <h3>This is your box. Upload anything you want and share URL with your friends.
+                <a href="#" class="btn btn-mini btn-info" rel="popover" data-content="<ul><li>To download the file click the file icon.</li><li>Share your box URL with friends so they can download your files.</li><li>All viewers of this page will see the files the instant they are uploaded.</li></ul>" data-original-title="Tips">View tips ›</a> 
+              </h3>
+            </div>
+        </div>
         <ul class="thumbnails" id="files">
           {List.map(show_file(path,_), finfo)}
         </ul>
-        <div id="up">
-        </div>
-        <div id="error">
-        </div>
-        <a class="btn btn-success" href="#" onclick={_ -> add_file(path)}>Add file</a>
       </div>
     </body>
   )
@@ -195,7 +218,7 @@ show_box(path) =
 do_404() = 
 (
   Resource.styled_page("Oops", [],
-    <h1>Oops, we cannot find your page!</h1>
+    <h3>Sorry, we cannot find your page!</h3>
   )
 )
 
@@ -221,6 +244,6 @@ start(uri) = (
 //server = Server.simple_dispatch(start)
 _ = Server.start(Server.http,
         [{resources = @static_resource_directory("resources")},
-         {register = ["/resources/css/bootstrap.min.css", "/resources/css/style.css"]},
+         {register = ["/resources/css/bootstrap.min.css", "/resources/css/style.css", "/resources/js/bootstrap.min.js", "/resources/js/boxopa.js"]},
          {dispatch = start}] <: Server.handler)
     
