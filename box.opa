@@ -71,6 +71,10 @@ index_page() =
           </div>
         </div>
       </div>
+      <div class="footer centered">
+        <span>Fork on <a href="https://github.com/jvimal/boxopa">GitHub</a></span> ·
+        <span>Built with <a href="http://opalang.org"><img src="/resources/img/opa-logo-small.png" alt="Opa"/></a></span>
+      </div>
     </body>
   )
 )
@@ -216,6 +220,10 @@ show_box(path) =
         <ul class="thumbnails" id="files">
           {List.map(show_file(path,_), finfo)}
         </ul>
+      </div>
+      <div class="footer centered">
+        <span>Fork on <a href="https://github.com/jvimal/boxopa">GitHub</a></span> ·
+        <span>Built with <a href="http://opalang.org"><img src="/resources/img/opa-logo-small.png" alt="Opa"/></a></span>
       </div>
     </body>
   )
