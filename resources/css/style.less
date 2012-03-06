@@ -2,68 +2,180 @@
  * @author Ida Swarczewskaja (CSS & design)
  */
 /* Colors */
-@darkBlue:	#1F3546;
-@darkerBlue:	#121F29;
-@lightBlue:     #87A9C5;
-@grayBlue:	#668396;
-@green:		#629E36;
+@darkBlue:	#121F29;
+@lightBlue: #B7CBDC;
+@gray:      #5C6871;
+@grayBlue:	#648290;
+@green:		  #88B567;   
 
 .color_bg(@color: @white, @alpha: 1) {
   background: hsla(hue(@color), saturation(@color), lightness(@color), @alpha);}
 
-/* Radius */
-.rounded-corners (@radius: 5px) {
+/* Box Shadow */
+.box-shadow(@shadow: 0 1px 3px rgba(0,0,0,.25)) {
+  -webkit-box-shadow: @shadow;
+     -moz-box-shadow: @shadow;
+          box-shadow: @shadow;
+}
+/* Border Radius */
+.border-radius (@radius: 5px) {
   border-radius: @radius;
   -webkit-border-radius: @radius;
   -moz-border-radius: @radius;
 }
+
+/* Gradient Bar */
+.gradientBar(@primaryColor, @secondaryColor) {
+  #gradient > .vertical(@primaryColor, @secondaryColor);
+  border-color: @secondaryColor @secondaryColor darken(@secondaryColor, 15%);
+  border-color: rgba(0,0,0,.1) rgba(0,0,0,.1) fadein(rgba(0,0,0,.1), 15%);
+}
+#gradient {
+  .vertical(@startColor: #555, @endColor: #333) {
+    background-color: mix(@startColor, @endColor, 60%);
+    background-image: -moz-linear-gradient(top, @startColor, @endColor); // FF 3.6+
+    background-image: -ms-linear-gradient(top, @startColor, @endColor); // IE10
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(@startColor), to(@endColor)); // Safari 4+, Chrome 2+
+    background-image: -webkit-linear-gradient(top, @startColor, @endColor); // Safari 5.1+, Chrome 10+
+    background-image: -o-linear-gradient(top, @startColor, @endColor); // Opera 11.10
+    background-image: linear-gradient(top, @startColor, @endColor); // The standard
+    background-repeat: repeat-x;
+    filter: e(%("progid:DXImageTransform.Microsoft.gradient(startColorstr='%d', endColorstr='%d', GradientType=0)",@startColor,@endColor)); // IE9 and down
+  }
+}
+/* Button Background */
+.buttonBackground(@startColor, @endColor) {
+  .gradientBar(@startColor, @endColor);
+
+  /* in these cases the gradient won't cover the background, so we override */
+  &:hover, &:active, &.active, &.disabled, &[disabled] {
+    background-color: @endColor;
+  }
+
+  /* IE 7 + 8 can't handle box-shadow to show active, so we darken a bit ourselves */
+  &:active,
+  &.active {
+    background-color: darken(@endColor, 10%) e("\9");
+  }
+}
+
+/* Green Button */
+.btn-success {
+  .buttonBackground(#A1C587,#629E36);
+}
+
 /* Main */
-html, .navbar-inner {
+html {
   background: #101314 fixed url('/resources/img/boxopa-bg-gradient.png') repeat-x top left;
 }
-.navbar-inner {
-  border-bottom:1px solid @darkerBlue;
-  /*background-image: -webkit-linear-gradient(top, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.1));*/
-  -webkit-box-shadow: 0 1px 3px rgba(255, 255, 255, 0.1), inset 0 -1px 0 rgba(0, 0, 0, 0.1);
-}
-body {
+body, .navbar-inner {
   background:transparent;
 }
 body, h1,h2,h3,h4,h5,h6 {
 color: @grayBlue;
-font-weight: normal;
+font-weight: 300;
 text-shadow: 0 -1px 1px black;
 }
+h2 {margin-bottom:18px;}
 
-.navbar input {background:@darkBlue;color:@green;border-color:#121F29;}
-.centered {text-align:center;}
+label {
+  color:@grayBlue;
+  font-size:14px;
+  font-weight:bold;
+  margin-right:5px;
+}
+.popover, .popover h3 {text-shadow:none;}
 
-.thumbnail {text-align:center;border:none;}
+/* Navbar */
+.navbar-inner {
+  border-bottom:1px solid @darkBlue;
+  @shadow: 0 1px 3px rgba(255,255,255,.1), inset 0 -1px 0 rgba(0,0,0,.1);
+  .box-shadow(@shadow);
+}
+.navbar .brand {
+  position: relative;
+  margin: 0 auto;
+  padding: 12px 20px 8px;
+  text-align: center;
+  float: none;
+}
+.navbar input {
+  background:@darkBlue;
+  .color_bg(@darkBlue,.5);
+  color:@green;
+  border-color:@darkBlue;
+}
+.navbar .form-inline {
+  margin-bottom:10px;
+}
+
+/* Well */
+.well {
+  background:@darkBlue;
+  .color_bg(@darkBlue,.4);
+  padding:5px;
+}
+.well form{
+  margin: 10px 0 2px 0;
+  text-align:center;
+}
+
+/* File upload input */
+input[type="file"] {
+  background:whiteSmoke;
+  width:auto;
+  vertical-align: top;
+}
 
 /* File */
-.thumbnails > li {position:relative;}
-a.cross {
+.thumbnails > li {
+  height:170px; 
+  overflow:hidden;
+}
+.thumbnail {text-align:center;border:none;}
+.thumbnail-inner {
+  position:relative;
+  width: 90px;
+  margin:0 auto;
+  padding-top:5px;
+}
+.thumbnail-inner a.circle {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+.thumbnail-inner a > .download {
+  display:none;
+  width: 46px;
+  background: url('/resources/img/boxopa-download-arrow.png');
+  height: 56px;
+  position: absolute;
+  top: 24px;
+  left: 22px;
+}
+.thumbnail-inner a:hover > .download {
+  display:block;
+}
+
+/* Circle link */
+a.circle {
   background-color:@darkBlue;
-  border:2px solid white;
-  color:white;
-  font-size:26px;
+  border:2px solid @lightBlue;
+  color:@lightBlue;
+  font-size:20px;
   line-height: 14px;
   font-weight:bold;
   height: 20px;
   width: 20px;
   display: block;
   text-align: center;
-  .rounded-corners(15px);
-position: absolute;
-top: 0;
-right: 35px;
-}
-.well {
-  .color_bg(@darkerBlue,.5);
-  padding:5px;
+  .border-radius(15px);
 }
 
-/* homepage */
+/* Homepage */
+.centered {text-align:center;}
+.centered > a, .centered > img {position:relative;margin:0 auto;}
+
 a.box { 
   background:transparent url('/resources/img/boxopa-box.png') no-repeat 50% 50%;
   height:256px;
@@ -71,6 +183,10 @@ a.box {
   display:block;
 }
 a.box .well {
-  color:white;
-  font-size:16px;
+  position: relative;
+  top: 105px;
+  width: 140px;
+  left: 53px;
 }
+a.circle:hover, a.box:hover {text-decoration:none;}
+a.box .well h3 {color:white;}
