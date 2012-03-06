@@ -72,9 +72,9 @@ body, .navbar-inner {
   background:transparent;
 }
 body, h1,h2,h3,h4,h5,h6 {
-color: @grayBlue;
-font-weight: 300;
-text-shadow: 0 -1px 1px black;
+  color: @grayBlue;
+  font-weight: normal;
+  text-shadow: 0 -1px 1px black;
 }
 h2 {margin-bottom:18px;}
 
@@ -190,3 +190,22 @@ a.box .well {
 }
 a.circle:hover, a.box:hover {text-decoration:none;}
 a.box .well h3 {color:white;}
+
+/* Footer */
+#content {margin-bottom:20px;}
+
+.footer {
+  color:@gray;
+  background:black;
+  .color_bg(black,.5);
+  border-top: 1px solid @darkBlue;
+  @shadow: 0 -1px 0 rgba(255,255,255,0.05), inset 0 1px 3px rgba(0,0,0,.1);
+  .box-shadow(@shadow);
+  margin-top:10px;
+  padding: 10px 0;
+  position: fixed;
+  width: 100%;
+  bottom: 0;
+  left: 0;
+}
+.footer span, .footer a, .footer img {vertical-align: middle;}
