@@ -1,44 +1,26 @@
-
 import stdlib.themes.bootstrap.core
 import stdlib.upload
 import stdlib.io.file
 import stdlib.web.client
 
-type FileInfo = {
-  name: string;
-  id: string;
-  mimetype: string;
+type FileInfo = { string name, string id, string mimetype }
+
+type File = { FileInfo info, string content }
+
+type Box = { list(File) files }
+
+database stringmap(Box) /box
+database /box[_] = { files: [] }
+
+server hostname = "http://localhost:8080"
+
+server function box_url(id) {
+  "{hostname}/box/{id}"
 }
 
-type File = {
-  name: string;
-  id: string;
-  mimetype: string;
-  content: string
-}
-
-type Box = { files: list(File) }
-
-db /box: stringmap(Box)
-db /box[_] = { files = [] }
-
-@server
-hostname() = "http://localhost:8080"
-
-@server
-get_file_info(f: File) =
-  { name = f.name;
-    mimetype = f.mimetype; 
-    id = f.id }
-
-@server
-box_url(id) = "{hostname()}/box/{id}"
-
-@server
-index_page() = 
-(
+server function index_page() {
   id = Random.string(8)
-  Resource.page("Creating new box", 
+  Resource.page("Creating new box",
 // onclick="this.select();"
     <body>
       <a href="https://github.com/jvimal/boxopa" xmlns="http://www.w3.org/1999/xhtml">
@@ -54,7 +36,7 @@ index_page() =
                   <label>Your box URL </label>
                   <input type="text" id="perm" value="{box_url(id)}" />
                 </div>
-              </div>    
+              </div>
             </div>
           </div>
         </div>
@@ -67,7 +49,7 @@ index_page() =
                 <h3>Click to open</h3>
               </div>
             </a>
-            <h3>Welcome. Your box has been created.</h3>       
+            <h3>Welcome. Your box has been created.</h3>
           </div>
         </div>
       </div>
@@ -77,33 +59,28 @@ index_page() =
       </div>
     </body>
   )
-)
+}
 
-@server
-create_file(bid, f) =
-(
-  do /box[bid]/files <- List.add(f, /box[bid]/files);
-  void
-)
+server function create_file(bid, f) {
+  /box[bid]/files <- [f | /box[bid]/files]
+}
 
-@server
-delete_file(bid, id) =
-(
+server function delete_file(bid, id) {
   files = /box[bid]/files
   room = network(bid)
-  info = {id = id; name = ""; mimetype = ""}
-  do /box[bid]/files <- List.remove_p((e -> e.id == id), files)
+  info = {~id, name: "", mimetype: ""}
+  /box[bid]/files <- List.remove_p(function (e) {e.info.id == id}, files)
   Network.broadcast(info, room)
-)
+}
 
-@server
-get_image(m) =
-  if String.has_prefix("image", m) then "/resources/img/boxopa-file-img.png"
-  else "/resources/img/boxopa-file-misc.png"
+server function get_image(m) {
+  if (String.has_prefix("image", m))
+    "/resources/img/boxopa-file-img.png"
+  else
+    "/resources/img/boxopa-file-misc.png"
+}
 
-@server
-show_file(box, f) =
-(
+server function show_file(box, f) {
   <li class="span2" id="{f.id}">
     <div class="thumbnail">
       <div class="thumbnail-inner">
@@ -111,79 +88,65 @@ show_file(box, f) =
           <img src="{get_image(f.mimetype)}"/>
           <div class="download"></div>
        </a>
-       <a href="#" class="circle" onclick={_ -> delete_file(box, f.id)} title="Remove">×</a>
+      <a href="#" class="circle" onclick={function (_) { delete_file(box, f.id)}} title="Remove">×</a>
       </div>
       <div class="caption">
         <h5><a href="/assets/{box}/{f.id}/{f.name}">{f.name}</></h5>
       </div>
     </div>
   </li>
-)
+}
 
-@server
-process_upload(bid,upload_data) =
-(
+server function process_upload(bid, upload_data) {
   up_file = StringMap.get("upload", upload_data.uploaded_files)
-  match up_file with
-    | {some = f} -> 
-          id = Random.string(8)
-          name = f.filename
-          mtype = f.mimetype
-          content = f.content
-          room = network(bid)
-          info = { id = id;
-                   name = name;
-                   mimetype = mtype; }
-          new_file = { id = id;
-                       name = name;
-                       mimetype = mtype;
-                       content = content } // Storing file in database; work on C-extension
-          do create_file(bid, new_file)
-          do Network.broadcast(info, room)
-          void
-    | _ -> 
-          do Dom.transform([#error +<- <h3>File uploading failed, please try again.</h3>])
-          void
-)
+  match (up_file) {
+  case {some: f}:
+    id = Random.string(8)
+    room = network(bid)
+    info = { id: Random.string(8),
+             name: f.filename,
+             mimetype: f.mimetype
+           }
+    new_file = { ~info, content: f.content }
+     // Storing file in database; work on C-extension
+    create_file(bid, new_file);
+    Network.broadcast(info, room)
+  default:
+    #error =+ <h3>File uploading failed, please try again.</h3>
+  }
+}
 
-show_upload_form(bid) =
-(
+function show_upload_form(bid) {
   Upload.html(
     { Upload.default_config() with
-        form_id = "upload";
-        form_body =
-            <input type="file" name="upload" />
-            <input type="submit" class="btn btn-success" value="Upload" />;
-        process = a -> process_upload(bid, a);
-     })
-)
+      form_id: "upload",
+      form_body:
+        <input type="file" name="upload" />
+      <input type="submit" class="btn btn-success" value="Upload" />,
+      process: process_upload(bid, _)
+    }
+  )
+}
 
-
-//add_file(bid) =
-//(
-//  Dom.transform([#up <- show_upload_form(bid)])
-//)
-
-network(id) : Network.network(FileInfo) =
+function Network.network(FileInfo) network(id) {
   Network.cloud(id)
+}
 
-files_update(boxid, f: FileInfo) =
-  if f.name != "" then
-    Dom.transform([#files +<- show_file(boxid, f)])
+function files_update(boxid, FileInfo f) {
+  if (f.name != "")
+    #files =+ show_file(boxid, f)
   else
     Dom.remove(#{f.id})
+}
 
-
-@server
-show_box(path) = 
-(
+server function show_box(path) {
   b = /box[path]
   room = network(path)
-  callback = e -> files_update(path, e)
-  finfo = List.map(get_file_info, b.files)
+  callback = files_update(path, _)
+  finfo = List.map(_.info, b.files)
   Resource.styled_page("Showing box {path}", ["/css"],
 //onclick="this.select();" />
-    <body onready={_ -> Network.add_callback(callback, room)}>
+    <body onready={function(_) { Network.add_callback(callback, room)}}>
       <a href="https://github.com/jvimal/boxopa" xmlns="http://www.w3.org/1999/xhtml">
         <img style="position: absolute; top: 0; left: 0; border: 0;" src="https://a248.e.akamai.net/assets.github.com/img/ce742187c818c67d98af16f96ed21c00160c234a/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f6c6566745f677261795f3664366436642e706e67" alt="Fork me on GitHub"/>
       </a>
@@ -227,37 +190,38 @@ show_box(path) =
       </div>
     </body>
   )
-)
+}
 
-do_404() = 
-(
+page_404 =
   Resource.styled_page("Oops", [],
     <h3>Sorry, we cannot find your page!</h3>
   )
+
+function deliver_assets(lst) {
+  match (lst) {
+  case [boxid, assetid, name]:
+    files = /box[boxid]/files
+    function match_file(f) { f.info.id == assetid && f.info.name == name }
+    match (List.find(match_file, files)) {
+    case {some: file}: Resource.raw_response(file.content, file.info.mimetype, {success})
+    default: Resource.raw_status({unauthorized})
+    }
+  default: page_404
+  }
+}
+
+server function start(Uri.relative uri) {
+  match (uri) {
+  case {path: [] ...}: index_page()
+  case {path: ["box" | tl] ...}: show_box(String.concat("", tl))
+  case {path: ["assets" | tl] ...}: deliver_assets(tl)
+  default: page_404
+  }
+}
+
+Server.start(Server.http,
+  [ {resources: @static_resource_directory("resources")},
+    {register: ["/resources/css/bootstrap.min.css", "/resources/css/style.css", "/resources/js/bootstrap.min.js", "/resources/js/boxopa.js"]},
+    {dispatch: start}
+  ]
 )
-
-deliver_assets(lst) =
-  match lst with
-    | [boxid, assetid, name] -> (
-        files = /box[boxid]/files
-        match List.find((e -> e.id == assetid && e.name == name), files) with
-          | {some = file} -> Resource.raw_response(file.content, file.mimetype, {success})
-          | _ -> Resource.raw_status({unauthorized})
-      )
-    | _ -> do_404()
-
-@server
-start(uri) = (
-  match uri with
-    | {path = {nil} ...} -> index_page()
-    | {path = {hd="box" ~tl} ...} -> show_box(String.concat("", tl))
-    | {path = {hd="assets" ~tl} ...} -> deliver_assets(tl)
-    | {path = _ ...} -> do_404()
-)
-
-//server = Server.simple_dispatch(start)
-_ = Server.start(Server.http,
-        [{resources = @static_resource_directory("resources")},
-         {register = ["/resources/css/bootstrap.min.css", "/resources/css/style.css", "/resources/js/bootstrap.min.js", "/resources/js/boxopa.js"]},
-         {dispatch = start}] <: Server.handler)
-    
