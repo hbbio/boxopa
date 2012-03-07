@@ -21,7 +21,6 @@ server function box_url(id) {
 server function index_page() {
   id = Random.string(8)
   Resource.page("Creating new box",
-// onclick="this.select();"
     <body>
       <a href="https://github.com/jvimal/boxopa" xmlns="http://www.w3.org/1999/xhtml">
         <img style="position: absolute; top: 0; left: 0; border: 0;" src="https://a248.e.akamai.net/assets.github.com/img/ce742187c818c67d98af16f96ed21c00160c234a/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f6c6566745f677261795f3664366436642e706e67" alt="Fork me on GitHub"/>
@@ -34,7 +33,7 @@ server function index_page() {
                 <a class="brand" href="#"><img src="/resources/img/boxopa-logo.png" alt="boxopa"/></a>
                 <div class="centered form-inline">
                   <label>Your box URL </label>
-                  <input type="text" id="perm" value="{box_url(id)}" />
+                <input type="text" id="perm" value="{box_url(id)}" onclick={function(_) {Dom.trigger(#perm, {select})}} />
                 </div>
               </div>
             </div>
@@ -158,7 +157,7 @@ server function show_box(path) {
                 <a class="brand" href="#"><img src="/resources/img/boxopa-logo.png" alt="boxopa"/></a>
                 <div class="centered form-inline">
                   <label>Your box URL </label>
-                  <input type="text" id="perm" value="{box_url(path)}" />
+                  <input type="text" id="perm" value="{box_url(path)}" onclick={function(_) {Dom.trigger(#perm, {select})}} />
               </div>
               </div>
             </div>
