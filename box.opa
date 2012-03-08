@@ -15,28 +15,38 @@ server function box_url(id) {
   "{hostname}/box/{id}"
 }
 
-server function index_page() {
-  id = Random.string(8)
-  Resource.page("Creating new box",
-    <body>
-      <a href="https://github.com/jvimal/boxopa" xmlns="http://www.w3.org/1999/xhtml">
-        <img style="position: absolute; top: 0; left: 0; border: 0;" src="https://a248.e.akamai.net/assets.github.com/img/ce742187c818c67d98af16f96ed21c00160c234a/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f6c6566745f677261795f3664366436642e706e67" alt="Fork me on GitHub"/>
-      </a>
-      <div class="navbar">
-        <div class="navbar-inner">
-          <div class="container">
-            <div class="row">
-              <div class="span4 offset4">
-                <a class="brand" href="#"><img src="/resources/img/boxopa-logo.png" alt="boxopa"/></a>
-                <div class="centered form-inline">
-                  <label>Your box URL </label>
-                  <input type="text" id="perm" value="{box_url(id)}" onclick={function(_) {Dom.trigger(#perm, {select})}} />
-                </div>
-              </div>
+footer =
+  <div class="footer centered">
+    <span>Fork on <a target="_blank" href="https://github.com/jvimal/boxopa">GitHub</a></span> ·
+    <span>Built with <a target="_blank" href="http://opalang.org"><img src="/resources/img/opa-logo-small.png" alt="Opa"/></a></span>
+  </div>
+
+function header(id) {
+  <a href="https://github.com/jvimal/boxopa" target="_blank" xmlns="http://www.w3.org/1999/xhtml">
+    <img style="position: absolute; top: 0; left: 0; border: 0;" src="https://a248.e.akamai.net/assets.github.com/img/ce742187c818c67d98af16f96ed21c00160c234a/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f6c6566745f677261795f3664366436642e706e67" alt="Fork me on GitHub"/>
+  </a>
+  <div class="navbar">
+    <div class="navbar-inner">
+      <div class="container">
+        <div class="row">
+          <div class="span4 offset4">
+            <a class="brand" href="#"><img src="/resources/img/boxopa-logo.png" alt="boxopa"/></a>
+            <div class="centered form-inline">
+              <label>Your box URL </label>
+              <input type="text" id="perm" value="{box_url(id)}" onclick={function(_) {Dom.trigger(#perm, {select})}} />
             </div>
           </div>
         </div>
       </div>
+    </div>
+  </div>
+}
+
+server function index_page() {
+  id = Random.string(8)
+  Resource.page("Creating new box",
+    <body>
+      {header(id)}
       <div id="content" class="container">
         <div class="row">
           <div class="span4 offset4 centered">
@@ -49,10 +59,7 @@ server function index_page() {
           </div>
         </div>
       </div>
-      <div class="footer centered">
-        <span>Fork on <a href="https://github.com/jvimal/boxopa">GitHub</a></span> ·
-        <span>Built with <a href="http://opalang.org"><img src="/resources/img/opa-logo-small.png" alt="Opa"/></a></span>
-      </div>
+      {footer}
     </body>
   )
 }
@@ -140,27 +147,9 @@ server function show_box(path) {
   room = network(path)
   callback = files_update(path, _)
   finfo = List.map(_.info, b.files)
-  Resource.styled_page("Showing box {path}", ["/css"],
-//onclick="this.select();" />
+  Resource.page("Showing box {path}",
     <body onready={function(_) { Network.add_callback(callback, room)}}>
-      <a href="https://github.com/jvimal/boxopa" xmlns="http://www.w3.org/1999/xhtml">
-        <img style="position: absolute; top: 0; left: 0; border: 0;" src="https://a248.e.akamai.net/assets.github.com/img/ce742187c818c67d98af16f96ed21c00160c234a/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f6c6566745f677261795f3664366436642e706e67" alt="Fork me on GitHub"/>
-      </a>
-      <div class="navbar">
-        <div class="navbar-inner">
-          <div class="container">
-            <div class="row">
-              <div class="span4 offset4">
-                <a class="brand" href="#"><img src="/resources/img/boxopa-logo.png" alt="boxopa"/></a>
-                <div class="centered form-inline">
-                  <label>Your box URL </label>
-                  <input type="text" id="perm" value="{box_url(path)}" onclick={function(_) {Dom.trigger(#perm, {select})}} />
-              </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      {header(path)}
       <div id="content" class="container">
         <div class="row">
           <div class="span4 offset4">
@@ -180,10 +169,7 @@ server function show_box(path) {
           {List.map(show_file(path,_), finfo)}
         </ul>
       </div>
-      <div class="footer centered">
-        <span>Fork on <a href="https://github.com/jvimal/boxopa">GitHub</a></span> ·
-        <span>Built with <a href="http://opalang.org"><img src="/resources/img/opa-logo-small.png" alt="Opa"/></a></span>
-      </div>
+      {footer}
     </body>
   )
 }
