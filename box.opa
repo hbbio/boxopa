@@ -1,7 +1,4 @@
-import stdlib.themes.bootstrap.core
-import stdlib.upload
-import stdlib.io.file
-import stdlib.web.client
+import stdlib.{themes.bootstrap.core, upload, crypto, io.file, web.client}
 
 type FileInfo = { string name, string id, string mimetype }
 
@@ -33,7 +30,7 @@ server function index_page() {
                 <a class="brand" href="#"><img src="/resources/img/boxopa-logo.png" alt="boxopa"/></a>
                 <div class="centered form-inline">
                   <label>Your box URL </label>
-                <input type="text" id="perm" value="{box_url(id)}" onclick={function(_) {Dom.trigger(#perm, {select})}} />
+                  <input type="text" id="perm" value="{box_url(id)}" onclick={function(_) {Dom.trigger(#perm, {select})}} />
                 </div>
               </div>
             </div>
@@ -80,17 +77,18 @@ server function get_image(m) {
 }
 
 server function show_file(box, f) {
+  at = "/assets/{box}/{f.id}/{Crypto.Hash.md5(f.name)}"
   <li class="span2" id="{f.id}">
     <div class="thumbnail">
       <div class="thumbnail-inner">
-       <a href="/assets/{box}/{f.id}/{f.name}">
-          <img src="{get_image(f.mimetype)}"/>
-          <div class="download"></div>
-       </a>
+      <a href="{at}">
+        <img src="{get_image(f.mimetype)}"/>
+        <div class="download"></div>
+      </a>
       <a href="#" class="circle" onclick={function (_) { delete_file(box, f.id)}} title="Remove">×</a>
       </div>
       <div class="caption">
-        <h5><a href="/assets/{box}/{f.id}/{f.name}">{f.name}</></h5>
+        <h5><a href="{at}">{f.name}</></h5>
       </div>
     </div>
   </li>
@@ -100,7 +98,6 @@ server function process_upload(bid, upload_data) {
   up_file = StringMap.get("upload", upload_data.uploaded_files)
   match (up_file) {
   case {some: f}:
-    id = Random.string(8)
     room = network(bid)
     info = { id: Random.string(8),
              name: f.filename,
@@ -200,7 +197,9 @@ function deliver_assets(lst) {
   match (lst) {
   case [boxid, assetid, name]:
     files = /box[boxid]/files
-    function match_file(f) { f.info.id == assetid && f.info.name == name }
+    function match_file(f) {
+      f.info.id == assetid && Crypto.Hash.md5(f.info.name) == name
+    }
     match (List.find(match_file, files)) {
     case {some: file}: Resource.raw_response(file.content, file.info.mimetype, {success})
     default: Resource.raw_status({unauthorized})
