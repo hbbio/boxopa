@@ -10,6 +10,7 @@ database stringmap(Box) /box
 database /box[_] = { files: [] }
 
 server hostname = "http://localhost:8080"
+repository = "hbbio/boxopa"
 
 server function box_url(id) {
   "{hostname}/box/{id}"
@@ -17,12 +18,12 @@ server function box_url(id) {
 
 footer =
   <div class="footer centered">
-    <span>Fork on <a target="_blank" href="https://github.com/jvimal/boxopa">GitHub</a></span> ·
+    <span>Fork on <a target="_blank" href="https://github.com/{repository}">GitHub</a></span> ·
     <span>Built with <a target="_blank" href="http://opalang.org"><img src="/resources/img/opa-logo-small.png" alt="Opa"/></a></span>
   </div>
 
 function header(id) {
-  <a href="https://github.com/jvimal/boxopa" target="_blank" xmlns="http://www.w3.org/1999/xhtml">
+  <a href="https://github.com/{repository}" target="_blank" xmlns="http://www.w3.org/1999/xhtml">
     <img style="position: absolute; top: 0; left: 0; border: 0;" src="https://a248.e.akamai.net/assets.github.com/img/ce742187c818c67d98af16f96ed21c00160c234a/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f6c6566745f677261795f3664366436642e706e67" alt="Fork me on GitHub"/>
   </a>
   <div class="navbar">
