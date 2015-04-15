@@ -12,7 +12,7 @@ Instructions
     opa box.opa
 
 2. Run!
-    ./box.exe
+    ./box.js
     Visit: localhost:8080
 
 Would love any feedback.
