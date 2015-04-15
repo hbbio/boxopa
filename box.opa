@@ -2,7 +2,7 @@ import stdlib.{themes.bootstrap.core, upload, crypto, io.file, web.client}
 
 type FileInfo = { string name, string id, string mimetype }
 
-type File = { FileInfo info, string content }
+type File = { FileInfo info, binary content }
 
 type Box = { list(File) files }
 
@@ -42,7 +42,7 @@ function header(id) {
   </div>
 }
 
-server function index_page() {
+function index_page() {
   id = Random.string(8)
   Resource.page("Creating new box",
     <body>
@@ -64,11 +64,11 @@ server function index_page() {
   )
 }
 
-server function create_file(bid, f) {
+function create_file(bid, f) {
   /box[bid]/files <- [f | /box[bid]/files]
 }
 
-server function delete_file(bid, id) {
+function delete_file(bid, id) {
   files = /box[bid]/files
   room = network(bid)
   info = {~id, name: "", mimetype: ""}
@@ -101,7 +101,7 @@ server function show_file(box, f) {
   </li>
 }
 
-server function process_upload(bid, upload_data) {
+function process_upload(bid, upload_data) {
   up_file = StringMap.get("upload", upload_data.uploaded_files)
   match (up_file) {
   case {some: f}:
@@ -142,7 +142,7 @@ function files_update(boxid, FileInfo f) {
     Dom.remove(#{f.id})
 }
 
-server function show_box(path) {
+function show_box(path) {
   b = /box[path]
   room = network(path)
   callback = files_update(path, _)
@@ -161,7 +161,7 @@ server function show_box(path) {
           </div>
           <div class="span4">
               <h3>This is your box. Upload anything you want and share URL with your friends.
-                <a href="#" class="btn btn-mini btn-info" rel="popover" data-content="<ul><li>To download the file click the file icon.</li><li>Share your box URL with friends so they can download your files.</li><li>All viewers of this page will see the files the instant they are uploaded.</li></ul>" data-original-title="Tips">View tips ›</a> 
+                <a href="#" class="btn btn-mini btn-info" rel="popover" data-content="<ul><li>To download the file click the file icon.</li><li>Share your box URL with friends so they can download your files.</li><li>All viewers of this page will see the files the instant they are uploaded.</li></ul>" data-original-title="Tips">View tips ›</a>
               </h3>
             </div>
         </div>
@@ -187,14 +187,14 @@ function deliver_assets(lst) {
       f.info.id == assetid && Crypto.Hash.md5(f.info.name) == name
     }
     match (List.find(match_file, files)) {
-    case {some: file}: Resource.raw_response(file.content, file.info.mimetype, {success})
+    case {some: file}: Resource.raw_response(string_of_binary(file.content), file.info.mimetype, {success})
     default: Resource.raw_status({unauthorized})
     }
   default: page_404
   }
 }
 
-server function start(Uri.relative uri) {
+function start(Uri.relative uri) {
   match (uri) {
   case {path: [] ...}: index_page()
   case {path: ["box" | tl] ...}: show_box(String.concat("", tl))
@@ -205,7 +205,11 @@ server function start(Uri.relative uri) {
 
 Server.start(Server.http,
   [ {resources: @static_resource_directory("resources")},
-    {register: ["/resources/css/bootstrap.min.css", "/resources/css/style.css", "/resources/js/bootstrap.min.js", "/resources/js/boxopa.js"]},
+    {register:
+      [ {doctype: {html5}},
+        {css: ["/resources/css/bootstrap.min.css", "/resources/css/style.css"]},
+        {js: ["/resources/js/bootstrap.min.js", "/resources/js/boxopa.js"]}
+      ]},
     {dispatch: start}
   ]
 )

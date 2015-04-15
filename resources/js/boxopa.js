@@ -2,8 +2,8 @@ $("*[rel=popover]")
 	.popover({
 		placement: 'bottom',
 		live: true,
-        html: true
-		})
+    html: true
+	})
 	.click(function(e) {
-        e.preventDefault() 
-    });
+    e.preventDefault()
+  });
