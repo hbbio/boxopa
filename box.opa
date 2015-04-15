@@ -9,10 +9,10 @@ type Box = { list(File) files }
 database stringmap(Box) /box
 database /box[_] = { files: [] }
 
-server hostname = "http://localhost:8080"
+hostname = "http://localhost:8080"
 repository = "hbbio/boxopa"
 
-server function box_url(id) {
+function box_url(id) {
   "{hostname}/box/{id}"
 }
 
@@ -66,7 +66,7 @@ function index_page() {
 }
 
 function create_file(bid, f) {
-  /box[bid]/files <- [f | /box[bid]/files]
+  /box[bid] <- { files <+ f }
 }
 
 function delete_file(bid, id) {
@@ -77,7 +77,7 @@ function delete_file(bid, id) {
   Network.broadcast(info, room)
 }
 
-server function get_image(m) {
+function get_image(m) {
   if (String.has_prefix("image", m))
     "/resources/img/boxopa-file-img.png"
   else
